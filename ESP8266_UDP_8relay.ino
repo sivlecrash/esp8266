@@ -12,9 +12,9 @@ IPAddress ipMulti(224, 0, 23, 12);
 unsigned int portMulti = 3671;
 int loopNumber = 0;
 //Individual Address - 1.1.1 Area [4 bit] . Line [4 bit] . Bus device [1 byte]
-uint8_t KNXarea = 10;
-uint8_t KNXline = 0;
-uint8_t KNXdevice = 1;
+uint8_t UDParea = 10;
+uint8_t UDPline = 0;
+uint8_t UDPdevice = 1;
 
 int relayPinD0 = D0;
 int relayPinD1 = D1;
@@ -67,15 +67,15 @@ void setup() {
   packetBufferWrite[1] = 16;    //ok 10[HEX] - Protocol version (constant) [1byte]
   packetBufferWrite[2] = 5;     //ok  5[HEX] - Service Type ID [2byte]
   packetBufferWrite[3] = 48;    //ok 30[HEX] - Service Type ID [2byte]
-  packetBufferWrite[4] = 0;     //ok  0[HEX] - KNXnet/IP action [8bit+]
-  packetBufferWrite[5] = 17;    //   11[HEX] KNXnet/IP action [+4bit], Total length [4bit]
+  packetBufferWrite[4] = 0;     //ok  0[HEX] - UDPnet/IP action [8bit+]
+  packetBufferWrite[5] = 17;    //   11[HEX] UDPnet/IP action [+4bit], Total length [4bit]
   packetBufferWrite[6] = 41;    //ok 29[HEX] - Message Code [1byte]
   packetBufferWrite[7] = 0;     //ok  0[HEX] - Additional info [1byte...]
   packetBufferWrite[8] = 188;;  //ok BC[HEX] - Frame [1bit], Reserved [1bit], Repeat [1bit], Broadcast [1bit], Priority [2bit], ACK [1bit], error [1bit]
   packetBufferWrite[9] = 224;   //ok E0[HEX] - Type Destination [1bit], Routing [3bit], Ext. Frame Format [4bit]
-  KNXarea <<= 4;
-  packetBufferWrite[10] = KNXarea | KNXline; // 1/1/1 Individual Address - Area [4 bit] . Line [4 bit] . Bus device [1 byte]
-  packetBufferWrite[11] = KNXdevice;         // 1/1/1 Individual Address - Area [4 bit] . Line [4 bit] . Bus device [1 byte]
+  UDParea <<= 4;
+  packetBufferWrite[10] = UDParea | UDPline; // 1/1/1 Individual Address - Area [4 bit] . Line [4 bit] . Bus device [1 byte]
+  packetBufferWrite[11] = UDPdevice;         // 1/1/1 Individual Address - Area [4 bit] . Line [4 bit] . Bus device [1 byte]
   packetBufferWrite[12] = 0;    //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
   packetBufferWrite[13] = 1;    //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
   packetBufferWrite[14] = 1;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
@@ -134,7 +134,7 @@ void loop()
     stid <<= 8;
     stid = stid | packetBuffer[3];
 
-    //KNXnet/IP action [12bit], Total length [4bit]
+    //UDPnet/IP action [12bit], Total length [4bit]
     uint16_t ipaction = 0;
     uint8_t ipaction2 = packetBuffer[5];
     uint8_t tlength = packetBuffer[5];
@@ -244,24 +244,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 0)) {  // if "1bit" + "Read" + "1/0/0"
       Serial.print("1/0/0 - relayPinD0 - Read - ");
       Serial.println(relayPinD0state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 0;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD0state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 0;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD0state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -286,24 +286,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 1)) {  // if "1bit" + "Read" + "1/0/1"
       Serial.print("1/0/1 - relayPinD1 - Read - ");
       Serial.println(relayPinD1state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 1;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD1state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 1;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD1state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -328,24 +328,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 2)) {  // if "1bit" + "Read" + "1/0/2"
       Serial.print("1/0/2 - relayPinD2 - Read - ");
       Serial.println(relayPinD2state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 2;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD2state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 2;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD2state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -370,24 +370,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 3)) {  // if "1bit" + "Read" + "1/0/3"
       Serial.print("1/0/3 - relayPinD3 - Read - ");
       Serial.println(relayPinD3state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 3;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD3state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 3;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD3state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -412,24 +412,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 4)) {  // if "1bit" + "Read" + "1/0/4"
       Serial.print("1/0/4 - relayPinD4 - Read - ");
       Serial.println(relayPinD4state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 4;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD4state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 4;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD4state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -454,24 +454,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 5)) {  // if "1bit" + "Read" + "1/0/5"
       Serial.print("1/0/5 - relayPinD5 - Read - ");
       Serial.println(relayPinD5state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 5;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD5state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 5;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD5state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -496,24 +496,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 6)) {  // if "1bit" + "Read" + "1/0/6"
       Serial.print("1/0/6 - relayPinD6 - Read - ");
       Serial.println(relayPinD6state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 6;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD6state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 6;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD6state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -538,24 +538,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 7)) {  // if "1bit" + "Read" + "1/0/7"
       Serial.print("1/0/7 - relayPinD7 - Read - ");
       Serial.println(relayPinD7state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 7;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD7state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 7;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD7state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
@@ -580,24 +580,24 @@ void loop()
     if  ((tlength == 1) && (apci == 0) && (gamain == 1) && (gamiddle == 0) && (gasub == 8)) {  // if "1bit" + "Read" + "1/0/8"
       Serial.print("1/0/8 - relayPinD8 - Read - ");
       Serial.println(relayPinD8state);
-      uint8_t KNXipaction2 = 1;
-      uint8_t KNXdpt = 1; // 1=1bit
-      KNXipaction2 <<= 4;
-      packetBufferWrite[5] = KNXipaction2 | KNXdpt;    // 11 KNXnet/IP action [+4bit], Total length [4bit]
-      uint8_t KNXgaMain = 1;
-      uint8_t KNXgaMiddle = 0;
-      uint8_t KNXgaSub = 8;
-      KNXgaMain <<= 3;
-      packetBufferWrite[12] = KNXgaMain | KNXgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      packetBufferWrite[13] = KNXgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
-      uint8_t KNXat = 0; //0[HEX]
-      uint8_t KNXnpci = 0; //0[HEX]
-      KNXat <<= 7;
-      KNXnpci <<= 6;
-      packetBufferWrite[14] = KNXat | KNXnpci | KNXdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
-      uint8_t KNXapci2 = 1;
-      KNXapci2 <<= 6;
-      packetBufferWrite[16] = KNXapci2 | relayPinD8state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
+      uint8_t UDPipaction2 = 1;
+      uint8_t UDPdpt = 1; // 1=1bit
+      UDPipaction2 <<= 4;
+      packetBufferWrite[5] = UDPipaction2 | UDPdpt;    // 11 UDPnet/IP action [+4bit], Total length [4bit]
+      uint8_t UDPgaMain = 1;
+      uint8_t UDPgaMiddle = 0;
+      uint8_t UDPgaSub = 8;
+      UDPgaMain <<= 3;
+      packetBufferWrite[12] = UDPgaMain | UDPgaMiddle;   //0[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      packetBufferWrite[13] = UDPgaSub;                  //1[HEX] Group Address - Main [5 bit] / Middle [3 bit] / Sub [1 byte]
+      uint8_t UDPat = 0; //0[HEX]
+      uint8_t UDPnpci = 0; //0[HEX]
+      UDPat <<= 7;
+      UDPnpci <<= 6;
+      packetBufferWrite[14] = UDPat | UDPnpci | UDPdpt;    //1[HEX] AT [1bit], NPCI [3bit], Length(DPT) [4bit]
+      uint8_t UDPapci2 = 1;
+      UDPapci2 <<= 6;
+      packetBufferWrite[16] = UDPapci2 | relayPinD8state;  //80 APCI(Type) [+2 bit], DATA/APCI [6 bit]
       Udp.beginPacket(ipMulti, portMulti);
       Udp.write(packetBufferWrite, 17);
       Udp.endPacket();
